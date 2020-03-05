@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-__all__ = ['main_app', 'draw_cgps_blueprint', 'read_obs',
+__all__ = ['to_caom2', 'draw_cgps_blueprint', 'read_obs',
            'APPLICATION', 'COLLECTION']
 
 from caom2 import CalibrationLevel, ReleaseType, DataProductType
@@ -564,7 +564,7 @@ def read_obs(fname):
 
 
 def _update_catalog_plane(obs):
-    logging.debug('Begin _update_catalog_plane for {}.'.format(catalog_uri))
+    logging.debug(f'Begin _update_catalog_plane for {catalog_uri}.')
     assert obs is not None, 'Must have an observation to update'
 
     for ii in obs.planes:
@@ -577,7 +577,7 @@ def _update_catalog_plane(obs):
             plane.provenance = Provenance(
                 catalog_blueprint._get('Plane.provenance.name'))
             plane.provenance.project = catalog_blueprint._get(
-                'Plane.provenance.project')[1]
+                'Plane.provenance.project')
             plane.provenance.producer = catalog_blueprint._get(
                 'Plane.provenance.producer')
             plane.provenance.reference = catalog_blueprint._get(
@@ -586,7 +586,7 @@ def _update_catalog_plane(obs):
             if inputs:
                 for i in inputs.split():
                     plane.provenance.inputs.add(PlaneURI(str(i)))
-    logging.debug('Done _update_catalog_plane for {}.'.format(catalog_uri))
+    logging.debug(f'Done _update_catalog_plane for {catalog_uri}.')
 
 
 def _write_obs(obs, fname):
@@ -606,7 +606,7 @@ def set_catalog_plane_information(args):
             _write_obs(observation, args.out_obs_xml)
         else:
             logging.error(
-                'Could not find the xml to augment for {}'.format(catalog_uri))
+                f'Could not find the xml to augment for {catalog_uri}')
 
 
 def draw_cgps_blueprint(uri, headers, local, cert):
@@ -621,18 +621,17 @@ def draw_cgps_blueprint(uri, headers, local, cert):
         CADC services.
     :return: The blueprint, customized according to the input data.
     """
-    logging.debug('Begin blueprint customization for CGPS {}.'.format(uri))
+    logging.debug(f'Begin blueprint customization for CGPS {uri}.')
     blueprint = ObsBlueprint()
 
     _metadata_from(blueprint, headers, uri, local, cert)
     _set_defaults_and_overrides(blueprint)
 
-    logging.debug(
-        'Blueprint customatization complete for CGPS {}.'.format(uri))
+    logging.debug(f'Blueprint customatization complete for CGPS {uri}.')
     return blueprint
 
 
-def main_app():
+def to_caom2():
 
     # assumes the execution is organized by collections of files that make up
     # an observation
@@ -643,7 +642,7 @@ def main_app():
     args = get_arg_parser().parse_args()
     blueprints = {}
     for i, uri in enumerate(args.fileURI):
-        logging.debug('Begin customization for {}'.format(uri))
+        logging.debug(f'Begin customization for {uri}')
         headers = _get_headers(uri, args.local, i, args.cert)
         blueprint = draw_cgps_blueprint(uri, headers, args.local, args.cert)
         blueprints[uri] = blueprint
@@ -659,5 +658,4 @@ def main_app():
         tb = traceback.format_exc()
         logging.debug(tb)
         sys.exit(-1)
-    logging.debug(
-        'Done fitscaom2 processing for {}'.format(args.observation[1]))
+    logging.debug(f'Done fitscaom2 processing for {args.observation[1]}')

@@ -3,9 +3,9 @@ from __future__ import (absolute_import, division, print_function,
 
 from astropy.io import fits
 
-from cgps2caom2 import main_app, draw_cgps_blueprint
+from cgps2caom2 import to_caom2, draw_cgps_blueprint
 from caom2 import ObservationReader
-from caom2.diff import get_differences
+from caom2pipe import manage_composable as mc
 
 import os
 import pytest
@@ -36,28 +36,6 @@ def test_draw():
     assert test_blueprint._plan['Plane.provenance.lastExecuted'] == (
         ['DATE-FTS'], None)
 
-# def test_time_max():
-#     hdr1 = fits.Header()
-#     hdr1['INSTRUME'] = 'TEST'
-#     hdr1['OBSFREQ'] = '1420406000.0'
-#
-#     test_blueprint = draw_cgps_blueprint(TEST_URI, [hdr1], local=False,
-#                                          cert=None)
-#     assert test_blueprint._plan['Observation.metaRelease'] == None, 'wrong release date'
-#     test_release = '2004-04-02'
-#     from cgps2caom2 import _set_max_observation_release_date
-#     _set_max_observation_release_date(test_blueprint, test_release)
-#     assert test_blueprint._plan['Observation.metaRelease'] == '2004-04-02', \
-#         'wrong release date 2'
-#     test_release = '2002-04-02'
-#     _set_max_observation_release_date(test_blueprint, test_release)
-#     assert test_blueprint._plan['Observation.metaRelease'] == '2004-04-02', \
-#         'wrong release date 3'
-#     test_release = '2012-04-02'
-#     _set_max_observation_release_date(test_blueprint, test_release)
-#     assert test_blueprint._plan['Observation.metaRelease'] == '2012-04-02', \
-#         'wrong release date 4'
-
 
 @pytest.mark.parametrize('test_name', ['MC2_DRAO-ST', 'MC2_FCRAO', 'MD1_IRAS'])
 def test_main_app(test_name):
@@ -71,17 +49,14 @@ def test_main_app(test_name):
         ['ad:CGPS/{}'.format(name.split('.header')[0]) for name in
          os.listdir(location) if name.endswith('header')])
     sys.argv = \
-        ('cgps2caom2 --local {} --observation CGPS {} -o {} {}'.
-         format(files, test_name, actual_file_name, uris)).split()
-    main_app()
-    expected = _read_obs(os.path.join(location, '{}.xml'.format(test_name)))
-    actual = _read_obs(actual_file_name)
-    result = get_differences(expected, actual, 'Observation')
-    if result:
-        msg = 'Differences found in observation {} in {}\n{}'. \
-            format(expected.observation_id,
-                   location, '\n'.join([r for r in result]))
-        raise AssertionError(msg)
+        (f'cgps2caom2 --local {files} --observation CGPS {test_name} -o '
+         f'{actual_file_name} {uris}').split()
+    to_caom2()
+
+    test_result = mc.compare_observations(
+        actual_file_name, os.path.join(location, f'{test_name}.xml'))
+    if test_result is not None:
+        raise AssertionError(test_result)
 
 
 def _read_obs(fname):

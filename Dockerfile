@@ -20,8 +20,8 @@ RUN git clone https://github.com/${OPENCADC_REPO}/caom2tools.git --branch ${OPEN
 RUN git clone https://github.com/${OMC_REPO}/caom2pipe.git && \
   pip install ./caom2pipe
   
-RUN pip install git+https://github.com/${OMC_REPO}/cgps2caom2.git
+RUN git clone https://github.com/${OMC_REPO}/cgps2caom2.git && \
+    pip install ./cgps2caom2 && \
+    cp ./cgps2caom2/docker-entrypoint.sh / 
 
-COPY ./docker-entrypoint.sh ./
-
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

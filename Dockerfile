@@ -6,6 +6,8 @@ RUN apt-get install -y \
     git
 
 RUN pip install \
+    ftputil \
+    pytz \
     PyYAML \
     spherical-geometry
 

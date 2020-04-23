@@ -25,8 +25,8 @@ RUN git clone https://github.com/${OPENCADC_REPO}/caom2tools.git --branch ${OPEN
 RUN git clone https://github.com/${OMC_REPO}/caom2pipe.git && \
   pip install ./caom2pipe
   
-# RUN git clone https://github.com/${OMC_REPO}/cgps2caom2.git && \
-RUN pip install -e ./ && \
+RUN git clone https://github.com/${OMC_REPO}/cgps2caom2.git && \
+    pip install ./cgps2caom2 && \
     cp ./scripts/docker-entrypoint.sh / && \
     cp ./scripts/config.yml /
 

@@ -7,6 +7,7 @@ RUN apt-get install -y \
 
 RUN pip install \
     ftputil \
+    importlib-metadata \
     pytz \
     PyYAML \
     spherical-geometry
@@ -26,6 +27,7 @@ RUN git clone https://github.com/${OMC_REPO}/caom2pipe.git && \
   
 RUN git clone https://github.com/${OMC_REPO}/cgps2caom2.git && \
     pip install ./cgps2caom2 && \
-    cp ./cgps2caom2/docker-entrypoint.sh / 
+    cp ./cgps2caom2/scripts/docker-entrypoint.sh / && \
+    cp ./cgps2caom2/scripts/config.yml / && \
 
 ENTRYPOINT ["/docker-entrypoint.sh"]

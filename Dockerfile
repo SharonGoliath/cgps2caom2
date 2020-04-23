@@ -5,7 +5,9 @@ RUN apt-get install -y \
     build-essential \
     git
 
-RUN pip install spherical-geometry
+RUN pip install \
+    PyYAML \
+    spherical-geometry
 
 WORKDIR /usr/src/app
 
